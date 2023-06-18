@@ -1,0 +1,123 @@
+// HTML:
+// <canvas id="gameCanvas"></canvas>
+
+// CSS:
+// #gameCanvas { 
+//     width: 100%;
+//     height: 100%;
+// }
+
+// JavaScript:
+const canvas = document.getElementById("gameCanvas");
+const context = canvas.getContext("2d");
+
+// Game constants
+const GRID_SIZE = 20;
+const WIDTH = canvas.width / GRID_SIZE;
+const HEIGHT = canvas.height / GRID_SIZE;
+
+// Game state
+let score = 0;
+let cheatMode = false;
+let pacman = {
+  x: 0,
+  y: 0,
+  direction: "right",
+};
+
+let ghosts = [
+  { x: 5, y: 5 },
+  { x: 10, y: 5 },
+];
+
+// Handle user input
+document.addEventListener("keydown", (event) => {
+  switch (event.keyCode) {
+    case 37: // Left arrow
+      pacman.direction = "left";
+      break;
+    case 38: // Up arrow
+      pacman.direction = "up";
+      break;
+    case 39: // Right arrow
+      pacman.direction = "right";
+      break;
+    case 40: // Down arrow
+      pacman.direction = "down";
+      break;
+    case 67: // 'C' key for cheat mode
+      toggleCheatMode();
+      break;
+  }
+});
+
+// Update game state
+function update() {
+  movePacman();
+  checkCollision();
+  draw();
+}
+
+// Move Pac-Man
+function movePacman() {
+  switch (pacman.direction) {
+    case "left":
+      pacman.x = (pacman.x - 1 + WIDTH) % WIDTH;
+      break;
+    case "up":
+      pacman.y = (pacman.y - 1 + HEIGHT) % HEIGHT;
+      break;
+    case "right":
+      pacman.x = (pacman.x + 1) % WIDTH;
+      break;
+    case "down":
+      pacman.y = (pacman.y + 1) % HEIGHT;
+      break;
+  }
+}
+
+// Check for collisions
+function checkCollision() {
+  ghosts.forEach((ghost) => {
+    if (ghost.x === pacman.x && ghost.y === pacman.y) {
+      if (cheatMode) {
+        // Remove ghost if cheat mode is enabled
+        const index = ghosts.indexOf(ghost);
+        ghosts.splice(index, 1);
+        score += 100;
+      } else {
+        // Game over if cheat mode is disabled
+        gameOver();
+      }
+    }
+  });
+}
+
+// Toggle cheat mode
+function toggleCheatMode() {
+  cheatMode = !cheatMode;
+  console.log(`Cheat mode: ${cheatMode ? "enabled" : "disabled"}`);
+}
+
+// Game over
+function gameOver() {
+  console.log("Game over");
+  // Add your game over logic here
+}
+
+// Draw game state
+function draw() {
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Draw Pac-Man
+  context.fillStyle = "yellow";
+  context.beginPath();
+  context.arc(pacman.x * GRID_SIZE, pacman.y * GRID_SIZE, GRID_SIZE / 2, 0, Math.PI * 2);
+  context.closePath();
+  context.fill();
+  
+  // Draw ghosts
+  context.fillStyle = "red";
+  ghosts.forEach((ghost) => {
+    context.fillRect(ghost.x * GRID_SIZE, ghost.y * GRID_SIZE, GRID_SIZE, GRID_SIZE);
+  });
